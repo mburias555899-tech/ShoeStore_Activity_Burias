@@ -13,14 +13,18 @@ return new class extends Migration
     {
         Schema::create('shoe_products', function (Blueprint $table) {
             $table->id();
+
             $table->string('product_name');
             $table->string('brand');
             $table->string('category');
             $table->string('size');
             $table->string('color');
+
             $table->integer('stock_quantity');
             $table->decimal('price', 10, 2);
+
             $table->text('description')->nullable();
+
             $table->timestamps();
         });
     }

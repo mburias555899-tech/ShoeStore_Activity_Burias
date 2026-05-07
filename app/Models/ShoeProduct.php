@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ShoeProduct extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'product_name',
         'brand',
@@ -20,7 +17,6 @@ class ShoeProduct extends Model
         'description',
     ];
 
-    // Relationship
     public function orders()
     {
         return $this->hasMany(Order::class);

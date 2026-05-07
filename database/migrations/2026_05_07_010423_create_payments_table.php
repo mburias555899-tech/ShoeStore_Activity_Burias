@@ -13,10 +13,19 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained();
+
+            $table->foreignId('order_id')
+                ->constrained()
+                ->onDelete('cascade');
+
             $table->decimal('amount_paid', 10, 2);
             $table->decimal('remaining_balance', 10, 2);
-            $table->string('payment_status');
+
+            $table->enum('payment_status', ['Paid', 'Partial', 'Unpaid'])
+                ->default('Unpaid');
+
+            $table->date('payment_date');
+
             $table->timestamps();
         });
     }

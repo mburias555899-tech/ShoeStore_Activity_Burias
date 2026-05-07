@@ -5,96 +5,63 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\ShoeProduct;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
-    /**
-     * Display all orders
-     */
     public function index()
     {
-        $orders = Order::with('user', 'shoeProduct')->latest()->get();
-
-        return view('orders.index', compact('orders'));
-    }
-
-    /**
-     * Show create order form
-     */
-    public function create()
-    {
+        $orders = Order::with('shoeProduct')->get();
         $shoeProducts = ShoeProduct::all();
 
-        return view('orders.create', compact('shoeProducts'));
+        return view('orders', compact('orders', 'shoeProducts'));
     }
 
-    /**
-     * Store order
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'shoe_product_id' => 'required',
-            'quantity' => 'required|integer|min:1',
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'nullable|string|max:20',
+            'shoe_product_id' => 'required|exists:shoe_products,id',
+            'quantity' => 'required|numeric|min:1',
+            'status' => 'required',
         ]);
 
-        $shoe = ShoeProduct::findOrFail($request->shoe_product_id);
-
-        // Total Cost Formula
-        $totalCost = $request->quantity * $shoe->price;
-
-        contentReference[oaicite:2]{index=2}
+        $product = ShoeProduct::findOrFail($request->shoe_product_id);
 
         Order::create([
-            'user_id' => Auth::id(),
-            'shoe_product_id' => $shoe->id,
+            'customer_name' => $request->customer_name,
+            'customer_phone' => $request->customer_phone,
+            'shoe_product_id' => $request->shoe_product_id,
             'quantity' => $request->quantity,
-            'total_cost' => $totalCost,
-            'status' => 'Pending',
+            'total_cost' => $request->quantity * $product->price,
+            'status' => $request->status,
+            'order_date' => now(),
         ]);
 
         return redirect()->route('orders.index')
             ->with('success', 'Order created successfully.');
     }
 
-    /**
-     * Show single order
-     */
-    public function show(Order $order)
+    public function update(Request $request, $id)
     {
-        return view('orders.show', compact('order'));
-    }
+        $order = Order::findOrFail($id);
 
-    /**
-     * Edit order
-     */
-    public function edit(Order $order)
-    {
-        $shoeProducts = ShoeProduct::all();
-
-        return view('orders.edit', compact('order', 'shoeProducts'));
-    }
-
-    /**
-     * Update order
-     */
-    public function update(Request $request, Order $order)
-    {
         $request->validate([
-            'shoe_product_id' => 'required',
-            'quantity' => 'required|integer|min:1',
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'nullable|string|max:20',
+            'shoe_product_id' => 'required|exists:shoe_products,id',
+            'quantity' => 'required|numeric|min:1',
             'status' => 'required',
         ]);
 
-        $shoe = ShoeProduct::findOrFail($request->shoe_product_id);
-
-        $totalCost = $request->quantity * $shoe->price;
+        $product = ShoeProduct::findOrFail($request->shoe_product_id);
 
         $order->update([
-            'shoe_product_id' => $shoe->id,
+            'customer_name' => $request->customer_name,
+            'customer_phone' => $request->customer_phone,
+            'shoe_product_id' => $request->shoe_product_id,
             'quantity' => $request->quantity,
-            'total_cost' => $totalCost,
+            'total_cost' => $request->quantity * $product->price,
             'status' => $request->status,
         ]);
 
@@ -102,12 +69,9 @@ class OrderController extends Controller
             ->with('success', 'Order updated successfully.');
     }
 
-    /**
-     * Delete order
-     */
-    public function destroy(Order $order)
+    public function destroy($id)
     {
-        $order->delete();
+        Order::findOrFail($id)->delete();
 
         return redirect()->route('orders.index')
             ->with('success', 'Order deleted successfully.');

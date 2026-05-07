@@ -7,27 +7,18 @@ use Illuminate\Http\Request;
 
 class ShoeProductController extends Controller
 {
-    /**
-     * Display all products
-     */
     public function index()
     {
         $shoeProducts = ShoeProduct::all();
 
-        return view('shoe-products.index', compact('shoeProducts'));
+        return view('shoe-products', compact('shoeProducts'));
     }
 
-    /**
-     * Show create form
-     */
     public function create()
     {
-        return view('shoe-products.create');
+        return view('shoe-products');
     }
 
-    /**
-     * Store new product
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -36,9 +27,8 @@ class ShoeProductController extends Controller
             'category' => 'required',
             'size' => 'required',
             'color' => 'required',
-            'stock_quantity' => 'required|integer',
+            'stock_quantity' => 'required|numeric',
             'price' => 'required|numeric',
-            'description' => 'nullable',
         ]);
 
         ShoeProduct::create($request->all());
@@ -47,36 +37,32 @@ class ShoeProductController extends Controller
             ->with('success', 'Shoe product added successfully.');
     }
 
-    /**
-     * Show single product
-     */
-    public function show(ShoeProduct $shoeProduct)
+    public function show(string $id)
     {
-        return view('shoe-products.show', compact('shoeProduct'));
+        $shoeProduct = ShoeProduct::findOrFail($id);
+
+        return view('shoe-products', compact('shoeProduct'));
     }
 
-    /**
-     * Show edit form
-     */
-    public function edit(ShoeProduct $shoeProduct)
+    public function edit(string $id)
     {
-        return view('shoe-products.edit', compact('shoeProduct'));
+        $shoeProduct = ShoeProduct::findOrFail($id);
+
+        return view('shoe-products', compact('shoeProduct'));
     }
 
-    /**
-     * Update product
-     */
-    public function update(Request $request, ShoeProduct $shoeProduct)
+    public function update(Request $request, string $id)
     {
+        $shoeProduct = ShoeProduct::findOrFail($id);
+
         $request->validate([
             'product_name' => 'required',
             'brand' => 'required',
             'category' => 'required',
             'size' => 'required',
             'color' => 'required',
-            'stock_quantity' => 'required|integer',
+            'stock_quantity' => 'required|numeric',
             'price' => 'required|numeric',
-            'description' => 'nullable',
         ]);
 
         $shoeProduct->update($request->all());
@@ -85,11 +71,10 @@ class ShoeProductController extends Controller
             ->with('success', 'Shoe product updated successfully.');
     }
 
-    /**
-     * Delete product
-     */
-    public function destroy(ShoeProduct $shoeProduct)
+    public function destroy(string $id)
     {
+        $shoeProduct = ShoeProduct::findOrFail($id);
+
         $shoeProduct->delete();
 
         return redirect()->route('shoe-products.index')
